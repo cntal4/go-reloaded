@@ -1,9 +1,9 @@
 package processors
 
 import (
+	"go-reloaded/pkg/tokenizer"
 	"reflect"
 	"testing"
-	"go-reloaded/pkg/tokenizer"
 )
 
 func TestCaseProcessor_Process(t *testing.T) {

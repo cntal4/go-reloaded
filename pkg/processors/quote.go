@@ -14,16 +14,16 @@ func (p QuoteProcessor) Process(tokens []tokenizer.Token) []tokenizer.Token {
 
 		if tok.Type == tokenizer.Punct && tok.Value == "'" {
 			if inQuote {
-				// We're closing a quote → remove preceding space if any
+				// Closing quote - remove preceding space if any
 				if len(out) > 0 && out[len(out)-1].Type == tokenizer.Space {
 					out = out[:len(out)-1]
 				}
 				out = append(out, tok)
 				inQuote = false
 			} else {
-				// Opening quote → append it
+				// Opening quote
 				out = append(out, tok)
-				// Skip next token if it's a space (inside opening quote)
+				// Skip following space if present
 				if i+1 < len(tokens) && tokens[i+1].Type == tokenizer.Space {
 					i++
 				}

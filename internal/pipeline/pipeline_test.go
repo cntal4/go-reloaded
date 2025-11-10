@@ -4,9 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	
 	"go-reloaded/pkg/tokenizer"
-	
 )
 
 func TestPipeline_Process(t *testing.T) {
@@ -41,4 +39,3 @@ func TestPipeline_Process(t *testing.T) {
 		t.Errorf("Pipeline Process():\n got  %#v\n want %#v", got, want)
 	}
 }
-

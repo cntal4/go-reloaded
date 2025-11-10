@@ -25,10 +25,10 @@ func (p HexBinProcessor) Process(tokens []tokenizer.Token) []tokenizer.Token {
 			next := tokens[i+1]
 
 			// Case 1: direct marker after word (no space)
-			if next.Type == tokenizer.Marker {
+			if next.Type == tokenizer.Marker && isHexBinMarker(next.Value) {
 				tok = convertIfNeeded(tok, next)
 				i++ // skip marker
-			} else if next.Type == tokenizer.Space && i+2 < len(tokens) && tokens[i+2].Type == tokenizer.Marker {
+			} else if next.Type == tokenizer.Space && i+2 < len(tokens) && tokens[i+2].Type == tokenizer.Marker && isHexBinMarker(tokens[i+2].Value) {
 				tok = convertIfNeeded(tok, tokens[i+2])
 				// keep the space
 				out = append(out, tok, next)
@@ -40,6 +40,12 @@ func (p HexBinProcessor) Process(tokens []tokenizer.Token) []tokenizer.Token {
 		out = append(out, tok)
 	}
 	return out
+}
+
+// Helper to check if marker is hex or bin
+func isHexBinMarker(markerValue string) bool {
+	val := strings.ToLower(strings.TrimSpace(markerValue))
+	return val == "(hex)" || val == "(bin)"
 }
 
 // Helper that performs the numeric conversion

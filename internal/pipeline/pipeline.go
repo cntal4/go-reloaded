@@ -1,9 +1,8 @@
 package pipeline
 
 import (
-	
-	"go-reloaded/pkg/tokenizer"
 	"go-reloaded/pkg/processors"
+	"go-reloaded/pkg/tokenizer"
 )
 
 type Pipeline struct {
@@ -33,4 +32,3 @@ func (p *Pipeline) Process(tokens []tokenizer.Token) []tokenizer.Token {
 	}
 	return result
 }
-

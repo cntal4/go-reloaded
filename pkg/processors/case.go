@@ -27,6 +27,11 @@ func (p CaseProcessor) Process(tokens []tokenizer.Token) []tokenizer.Token {
 			}
 		}
 
+		// Only process case markers
+		if cmd != "up" && cmd != "low" && cmd != "cap" {
+			continue
+		}
+
 		// Apply transformations backwards
 		for j := i - 1; j >= 0 && count > 0; j-- {
 			if tokens[j].Type != tokenizer.Word {
@@ -58,13 +63,3 @@ func (p CaseProcessor) Process(tokens []tokenizer.Token) []tokenizer.Token {
 
 	return tokens
 }
-
-
-
-
-
-
-
-
-
-

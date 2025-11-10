@@ -1,5 +1,10 @@
 # Text Auto-Formatter (Go)
 
+[![CI](https://github.com/username/go-reloaded/workflows/CI/badge.svg)](https://github.com/username/go-reloaded/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/username/go-reloaded)](https://goreportcard.com/report/github.com/username/go-reloaded)
+[![Coverage](https://img.shields.io/badge/coverage-check%20CI-brightgreen)](https://github.com/username/go-reloaded/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A simple command-line tool written in Go that performs automatic text completion, editing and autocorrection according to a set of transformation rules (hex/bin conversion, case changes, punctuation normalization, quotes, and article correction).
 
 This README documents: setup, architecture, how to run the program and tests, an AI-agent-driven workflow for entry-level developers, and a granular, ordered Agile task list that follows Test-Driven Development (TDD). It also includes instructions for auditors (peer reviewers).
@@ -26,11 +31,50 @@ Transformation rules supported (high-level):
 
 ---
 
+## Examples
+
+### Transformation Rules
+
+| Rule | Input | Output | Description |
+|------|-------|--------|--------------|
+| Hex conversion | `42 (hex)` | `66` | Converts hexadecimal to decimal |
+| Binary conversion | `10 (bin)` | `2` | Converts binary to decimal |
+| Capitalization | `hello (cap)` | `Hello` | Capitalizes previous word |
+| Uppercase | `world (up)` | `WORLD` | Uppercases previous word |
+| Lowercase | `HELLO (low)` | `hello` | Lowercases previous word |
+| Multi-word case | `hello world (cap, 2)` | `Hello World` | Applies to N previous words |
+| Article correction | `a apple` | `an apple` | Changes 'a' to 'an' before vowels/h |
+| Quote normalization | `' hello '` | `'hello'` | Trims spaces inside quotes |
+| Punctuation spacing | `hello , world` | `hello, world` | Normalizes punctuation spacing |
+
+### Complex Example
+
+**Input:**
+```
+there (cap) once was a hero named link (cap, 3) ,he carried 1e (hex) rupees and 10 (bin) arrows. he said: ' this is a honor ' before entering a old temple (up, 2) ... amazing !
+```
+
+**Output:**
+```
+There once was an Hero Named Link, he carried 30 rupees and 2 arrows. he said:' this is an honor' before entering an OLD TEMPLE... amazing!
+```
+
 ## Architecture
 
 This project uses a **Pipeline** architecture where each transformation rule is implemented as a separate, testable stage (filter) that receives and returns a sequence of tokens or text. This makes the code modular, easy to test, and extendable.
 
-Each stage (example): `tokenize -> hex/bin conversion -> case transformations -> article correction -> punctuation normalization -> quotes normalization -> stringify`.
+**Pipeline Flow:**
+```
+Input Text → Tokenizer → HexBin → Case → Article → Quote → Punctuation → Output Text
+```
+
+**Components:**
+- **Tokenizer**: Splits text into words, spaces, punctuation, and markers
+- **HexBin Processor**: Converts hex/binary numbers to decimal
+- **Case Processor**: Handles (up), (low), (cap) transformations
+- **Article Processor**: Corrects 'a' to 'an' before vowels
+- **Quote Processor**: Normalizes single quote spacing
+- **Punctuation Processor**: Normalizes punctuation and spacing
 
 ---
 
@@ -55,11 +99,52 @@ Each stage (example): `tokenize -> hex/bin conversion -> case transformations ->
 
 ---
 
+## Quick Start
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd go-reloaded
+
+# Build the tool
+go build ./cmd/textfmt
+```
+
+### Basic Usage
+
+```bash
+# Run directly with Go
+go run ./cmd/textfmt input.txt output.txt
+
+# Or use the built binary
+./textfmt input.txt output.txt
+```
+
+### Example
+
+**Input file (input.txt):**
+```
+hello (cap) world, a amazing ' test ' with 42 (hex) and 10 (bin) numbers.
+```
+
+**Command:**
+```bash
+go run ./cmd/textfmt input.txt output.txt
+```
+
+**Output file (output.txt):**
+```
+Hello world, an amazing' test' with 66 and 2 numbers.
+```
+
 ## How to run
 
-1. Build/run directly with `go run ./cmd/textfmt <infile> <outfile>`.
-2. Run unit tests: `go test ./...`.
-3. Regression/golden tests: `go test ./... -run Golden` or a dedicated `integration_test.go` that reads files from `testdata/golden`.
+1. **Basic formatting**: `go run ./cmd/textfmt <input-file> <output-file>`
+2. **Run all tests**: `go test ./...`
+3. **Run golden tests**: `go test ./testdata/golden`
+4. **Run specific tests**: `go test ./pkg/processors -run TestCaseProcessor`
 
 ---
 
@@ -76,11 +161,132 @@ Agents must not push code directly; they should produce candidate changes the de
 
 ---
 
-## Testing Strategy
+## Development
 
-- Unit tests for each rule and edge cases.
-- Integration tests that run the full pipeline on golden inputs and compare to expected outputs.
-- Property tests for idempotency where appropriate (running formatter twice should not change correct output further).
+### Project Structure
+
+```
+go-reloaded/
+├── cmd/textfmt/          # Main CLI application
+├── pkg/
+│   ├── tokenizer/        # Text tokenization
+│   └── processors/       # Transformation processors
+├── internal/
+│   ├── pipeline/         # Pipeline orchestration
+│   └── logger/          # Logging utilities
+├── testdata/golden/      # Golden test files
+├── testutils/           # Test utilities
+└── docs/examples/       # Usage examples
+```
+
+### Testing Strategy
+
+- **Unit tests**: Each processor has comprehensive unit tests
+- **Integration tests**: Full pipeline testing with golden files
+- **Property tests**: Idempotency and edge case testing
+- **CLI tests**: Command-line interface validation
+
+### Running Tests
+
+```bash
+# Run all tests
+go test ./...
+
+# Run specific test suites
+go test ./pkg/processors          # Processor tests
+go test ./testdata/golden         # Golden tests
+go test ./testutils              # Property tests
+go test ./cmd/textfmt            # CLI tests
+
+# Run with verbose output
+go test ./... -v
+
+# Run specific test
+go test ./pkg/processors -run TestCaseProcessor
+```
+
+### Troubleshooting
+
+**Common Issues:**
+
+1. **"no such file or directory"**
+   ```bash
+   # Make sure input file exists
+   ls -la input.txt
+   ```
+
+2. **"permission denied"**
+   ```bash
+   # Check file permissions
+   chmod 644 input.txt
+   ```
+
+3. **Unexpected output**
+   ```bash
+   # Run golden tests to verify behavior
+   go test ./testdata/golden -v
+   ```
+
+4. **Build issues**
+   ```bash
+   # Clean and rebuild
+   go clean
+   go build ./cmd/textfmt
+   ```
+
+## CI/CD & Quality Assurance
+
+### Automated Testing
+
+This project uses GitHub Actions for continuous integration:
+
+- **Build & Test**: Runs on every push and pull request
+- **Linting**: Code quality checks with golangci-lint
+- **Coverage**: Test coverage reporting
+- **Golden Tests**: Validates all transformation rules
+
+### Local Quality Checks
+
+Run the complete audit locally:
+
+```bash
+./scripts/run_audit.sh
+```
+
+This script runs:
+- Code formatting checks
+- Static analysis (go vet)
+- Unit tests and golden tests
+- Race condition detection
+- CLI functionality validation
+- Idempotency verification
+- Coverage reporting
+
+### Peer Review Process
+
+1. **Before Review**: Run local audit script
+2. **Code Review**: Use `docs/audit_checklist.md`
+3. **Testing**: Verify all golden tests pass
+4. **Documentation**: Ensure examples work as documented
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run `./scripts/run_audit.sh`
+5. Submit a pull request
+6. Complete peer review checklist
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built following Test-Driven Development (TDD) principles
+- Implements a clean pipeline architecture for text processing
+- Comprehensive test suite with golden test validation
 
 ---
 

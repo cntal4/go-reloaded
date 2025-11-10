@@ -40,20 +40,41 @@ func Tokenize(s string) []Token {
 
 		// Handle punctuation
 		// Handle punctuation groups (e.g., "..." or "!?")
-if strings.ContainsRune(".,!?;:", ch) {
-    flush(detectType(current.String()))
+		// Handle single quotes - check if it's a contraction or standalone quote
+		if ch == '\'' {
+			// Check if apostrophe is between letters (contraction)
+			isContraction := false
+			if i > 0 && i < len(runes)-1 {
+				prevIsLetter := (runes[i-1] >= 'a' && runes[i-1] <= 'z') || (runes[i-1] >= 'A' && runes[i-1] <= 'Z')
+				nextIsLetter := (runes[i+1] >= 'a' && runes[i+1] <= 'z') || (runes[i+1] >= 'A' && runes[i+1] <= 'Z')
+				isContraction = prevIsLetter && nextIsLetter
+			}
 
-    start := i
-    // Combine consecutive punctuation characters
-    for i+1 < len(runes) && strings.ContainsRune(".,!?;:", runes[i+1]) {
-        i++
-    }
+			if isContraction {
+				// Part of a contraction - add to current word
+				current.WriteRune(ch)
+			} else {
+				// Standalone quote
+				flush(detectType(current.String()))
+				tokens = append(tokens, Token{Type: Punct, Value: "'"})
+			}
+			continue
+		}
 
-    punctGroup := string(runes[start : i+1])
-    tokens = append(tokens, Token{Type: Punct, Value: punctGroup})
-    continue
-}
+		// Handle other punctuation with grouping
+		if strings.ContainsRune(".,!?;:", ch) {
+			flush(detectType(current.String()))
 
+			start := i
+			// Combine consecutive punctuation characters
+			for i+1 < len(runes) && strings.ContainsRune(".,!?;:", runes[i+1]) {
+				i++
+			}
+
+			punctGroup := string(runes[start : i+1])
+			tokens = append(tokens, Token{Type: Punct, Value: punctGroup})
+			continue
+		}
 
 		// Handle spaces
 		if ch == ' ' {
@@ -97,5 +118,3 @@ func isMarker(s string) bool {
 		strings.HasPrefix(s, "(hex") ||
 		strings.HasPrefix(s, "(bin")
 }
-
-

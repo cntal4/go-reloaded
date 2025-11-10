@@ -33,9 +33,7 @@ func TestPunctuationProcessor_Process(t *testing.T) {
 			input: []tokenizer.Token{
 				{Type: tokenizer.Word, Value: "Wait"},
 				{Type: tokenizer.Space, Value: " "},
-				{Type: tokenizer.Punct, Value: "."},
-				{Type: tokenizer.Punct, Value: "."},
-				{Type: tokenizer.Punct, Value: "."},
+				{Type: tokenizer.Punct, Value: "..."},
 				{Type: tokenizer.Space, Value: " "},
 				{Type: tokenizer.Word, Value: "what"},
 			},
@@ -51,8 +49,7 @@ func TestPunctuationProcessor_Process(t *testing.T) {
 			input: []tokenizer.Token{
 				{Type: tokenizer.Word, Value: "Really"},
 				{Type: tokenizer.Space, Value: " "},
-				{Type: tokenizer.Punct, Value: "!"},
-				{Type: tokenizer.Punct, Value: "?"},
+				{Type: tokenizer.Punct, Value: "!?"},
 				{Type: tokenizer.Space, Value: " "},
 				{Type: tokenizer.Word, Value: "no"},
 			},
