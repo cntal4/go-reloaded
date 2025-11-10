@@ -1,27 +1,36 @@
 package pipeline
 
-import "go-reloaded/pkg/tokenizer"
+import (
+	
+	"go-reloaded/pkg/tokenizer"
+	"go-reloaded/pkg/processors"
+)
+
+type Pipeline struct {
+	stages []Processor
+}
 
 type Processor interface {
 	Process(tokens []tokenizer.Token) []tokenizer.Token
 }
 
-type Pipeline struct {
-	steps []Processor
-}
-
 func New() *Pipeline {
-	return &Pipeline{}
-}
-
-func (p *Pipeline) Add(step Processor) {
-	p.steps = append(p.steps, step)
-}
-
-func (p *Pipeline) Run(tokens []tokenizer.Token) []tokenizer.Token {
-	out := tokens
-	for _, step := range p.steps {
-		out = step.Process(out)
+	return &Pipeline{
+		stages: []Processor{
+			processors.HexBinProcessor{},
+			processors.CaseProcessor{},
+			processors.ArticleProcessor{},
+			processors.QuoteProcessor{},
+			processors.PunctuationProcessor{},
+		},
 	}
-	return out
 }
+
+func (p *Pipeline) Process(tokens []tokenizer.Token) []tokenizer.Token {
+	result := tokens
+	for _, stage := range p.stages {
+		result = stage.Process(result)
+	}
+	return result
+}
+

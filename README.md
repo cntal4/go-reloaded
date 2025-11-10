@@ -138,29 +138,196 @@ _Important_: Each task below is small and self-contained. Follow the order. For 
 - **Implementation goal**: Implement quote trimming logic.
 - **Validation**: Tests pass and match golden cases.
 
-### Task 11–20 — (Remaining tasks: punctuation, integration, idempotency, CLI, documentation, CI)
-(Refer to full README in project for details.)
+### Task 11 — Punctuation: single punctuation normalization
+**Goal**  
+Attach single punctuation marks `. , ! ? : ;` to the previous token (no space before) and ensure exactly one space after, unless punctuation ends a line.
+
+**TDD (write tests)**  
+- Tests that `"word ,next"` → `"word, next"`.
+- Tests that punctuation at end-of-line is handled correctly.
+- Edge cases: consecutive punctuation treated specially in next task.
+
+**Implementation**  
+- Create `pkg/processors/punctuation_basic.go` implementing `PunctuationBasicProcessor`.
+- Processor should normalize token spacing and attach punctuation to the left word.
+
+**Validation**  
+- `go test ./pkg/processors -run TestPunctuationBasic` passes.
 
 ---
 
-## Auditor Instructions
+### Task 12 — Punctuation: grouped punctuation handling
+**Goal**  
+Detect grouped punctuation sequences like `...`, `!?`, `!!`, `??` and format them as a single punctuation token with no preceding space and a single following space.
 
-1. Clone the repo.
-2. Run `go test ./...` — all unit tests should pass.
-3. Run `make golden` or `scripts/run_golden.sh` to validate golden test cases.
-4. For each failing case, create an issue and assign it to the auditee. Use the provided golden test input and expected output to reproduce.
+**TDD (write tests)**  
+- Tests for `"I was thinking ... You"` → `"I was thinking... You"`.
+- Tests for `"Really !? no"` → `"Really!? no"`.
+- Ensure `...` remains intact and not split into three `.` tokens.
+
+**Implementation**  
+- `PunctuationGroupedProcessor` that merges consecutive punctuation tokens into a single grouped token.
+
+**Validation**  
+- `go test ./pkg/processors -run TestPunctuationGrouped` passes.
 
 ---
 
-## Notes & best practices
+### Task 13 — Quotes processor (single quotes)
+**Goal**  
+Normalize single-quote tokens so that ` ' word ' ` becomes `'word'` and multi-word quotes keep internal spaces (`'a phrase here'`). Ensure punctuation next to quotes is handled correctly.
 
-- Keep each rule small, single-responsibility, and well-documented.
-- Prefer pure functions for rule transformations for easy testing.
-- Add table-driven tests for edge cases.
-- When in doubt, add a golden test that captures the desired behavior.
+**TDD (write tests)**  
+- Tests for `' awesome '` → `'awesome'`.
+- Tests for `' I am the man '` → `'I am the man'`.
+- Tests for quotes with punctuation: `'hello ,'` → `'hello,'`.
+
+**Implementation**  
+- `QuoteProcessor` that finds paired Quote tokens, trims internal edges, and preserves internal spacing.
+
+**Validation**  
+- `go test ./pkg/processors -run TestQuoteProcessor` passes.
 
 ---
 
-## Acknowledgements
+### Task 14 — Integration Tests
+**File:** `tasks/14_integration_tests.md`  
+**Goal:**  
+Combine all existing processors (Tokenizer, HexBin, Case, Article, Quote, Punctuation) into a single functional pipeline.  
+Ensure token flow, transformations, and order integrity are maintained end-to-end.
 
-Inputs used to produce this README: the project analysis and golden test set provided by the assignment.
+**TDD Steps:**  
+- Write integration tests that tokenize, process, and stringify text back to readable form.  
+- Compare pipeline output to known-correct (“golden”) text.  
+- Test invalid marker handling gracefully.
+
+**Implementation Notes:**  
+- Implement pipeline composition under `internal/pipeline/pipeline.go`.  
+- Ensure each processor conforms to the `Processor` interface.  
+- Add benchmarks for performance regression checks.
+
+**Validation:**  
+`go test ./internal/pipeline -run TestIntegrationPipeline -v`  
+should pass all golden examples.
+
+---
+
+### Task 15 — Idempotency & Property Tests
+**File:** `tasks/15_idempotency_test.md`  
+**Goal:**  
+Guarantee the formatter is idempotent — multiple runs yield identical results.
+
+**TDD Steps:**  
+- Add property tests: `format(format(text)) == format(text)`.  
+- Generate multiple random small strings and ensure stability.  
+- Add benchmarks for round-trip consistency.
+
+**Implementation Notes:**  
+- Implement test utilities under `testutils/`.  
+- Focus on processors that mutate text (Case, Punctuation).
+
+**Validation:**  
+`go test ./testutils -run TestIdempotency`  
+should pass and show no diffs between first and second runs.
+
+---
+
+### Task 16 — CLI Integration
+**File:** `tasks/16_cli_integration.md`  
+**Goal:**  
+Integrate file reading/writing in `cmd/textfmt/main.go` with command-line argument handling.
+
+**TDD Steps:**  
+- Mock file I/O and run CLI with temp files.  
+- Validate correct exit codes and stdout/stderr messages.  
+- Test missing input/output args and invalid file names.
+
+**Implementation Notes:**  
+- Use `os.ReadFile` and `os.WriteFile`.  
+- Leverage existing pipeline runner to process content.
+
+**Validation:**  
+`go test ./cmd/textfmt -run TestCLIIntegration -v`  
+and manual:  
+`go run . sample.txt result.txt` → expected output file matches golden text.
+
+---
+
+### Task 17 — Error Handling
+**File:** `tasks/17_error_handling.md`  
+**Goal:**  
+Add safe error handling, logging, and fallback logic across processors and CLI.
+
+**TDD Steps:**  
+- Test behavior for invalid markers, malformed tokens, unreadable files.  
+- Ensure pipeline returns partial but stable output rather than crashing.  
+- Verify proper `os.Exit(1)` on unrecoverable errors.
+
+**Implementation Notes:**  
+- Implement a `logger` helper under `internal/logger`.  
+- Use Go’s `errors.Join` or `fmt.Errorf` with `%w` for traceable wrapping.
+
+**Validation:**  
+`go test ./internal/logger -v`  
+`go run . missing.txt result.txt` → prints meaningful error without panic.
+
+---
+
+### Task 18 — Golden Tests
+**File:** `tasks/18_golden_tests.md`  
+**Goal:**  
+Validate final formatting behavior against golden input/output text files.
+
+**TDD Steps:**  
+- Load golden pairs from `docs/golden test set.md`.  
+- Compare processed text to expected outputs.  
+- Output diffs in a unified diff format when mismatches occur.
+
+**Implementation Notes:**  
+- Store test fixtures under `testdata/golden/`.  
+- Use `t.Helper()` and `cmp.Diff()` for clean output.
+
+**Validation:**  
+`go test ./testdata/golden -v`  
+shows all golden tests passing with no diff output.
+
+---
+
+### Task 19 — Documentation & Developer Help
+**File:** `tasks/19_docs_help.md`  
+**Goal:**  
+Finalize README examples, usage, and quick developer setup documentation.
+
+**TDD Steps:**  
+- Validate that `README.md` code blocks execute successfully.  
+- Ensure `go run . sample.txt result.txt` matches documented examples.  
+- Spellcheck and linkcheck documentation.
+
+**Implementation Notes:**  
+- Add `docs/examples/` folder with sample input/output.  
+- Include command-line usage guide and pipeline diagram.
+
+**Validation:**  
+`markdownlint README.md`  
+and visual README rendering verified on GitHub preview.
+
+---
+
+### Task 20 — CI & Peer Review Automation
+**File:** `tasks/20_ci_peer_review.md`  
+**Goal:**  
+Automate testing, linting, and peer auditing in CI/CD.
+
+**TDD Steps:**  
+- CI should run `go test ./...` + `go vet ./...`.  
+- Include a golden test sweep.  
+- Verify that CI status badges appear in README.
+
+**Implementation Notes:**  
+- Add `.github/workflows/ci.yml` with build/test/lint steps.  
+- Include a `scripts/run_audit.sh` for local auditing workflow.  
+- Peer review guide in `docs/audit_checklist.md`.
+
+**Validation:**  
+All GitHub Actions checks pass and PR template enforces peer audit completion.
+

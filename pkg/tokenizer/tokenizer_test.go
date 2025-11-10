@@ -21,7 +21,7 @@ func TestTokenize_BasicSentence(t *testing.T) {
 		{Word, "of"},
 		{Space, " "},
 		{Word, "times"},
-		{Punctuation, ","},
+		{Punct, ","},
 		{Space, " "},
 		{Word, "it"},
 		{Space, " "},
@@ -43,14 +43,14 @@ func TestTokenize_BasicSentence(t *testing.T) {
 	}
 }
 
-func TestTokenize_PunctuationGroup(t *testing.T) {
+func TestTokenize_PunctGroup(t *testing.T) {
 	input := "Wait... what!?"
 	want := []Token{
 		{Word, "Wait"},
-		{Punctuation, "..."},
+		{Punct, "..."},
 		{Space, " "},
 		{Word, "what"},
-		{Punctuation, "!?"},
+		{Punct, "!?"},
 	}
 	got := Tokenize(input)
 	if !reflect.DeepEqual(got, want) {
