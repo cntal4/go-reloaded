@@ -15,12 +15,12 @@ func TestPipeline_Process(t *testing.T) {
 		{Type: tokenizer.Space, Value: " "},
 		{Type: tokenizer.Word, Value: "amazing"},
 		{Type: tokenizer.Space, Value: " "},
-		{Type: tokenizer.Punctuation, Value: "'"},
+		{Type: tokenizer.Punct, Value: "'"},
 		{Type: tokenizer.Space, Value: " "},
 		{Type: tokenizer.Word, Value: "idea"},
 		{Type: tokenizer.Space, Value: " "},
-		{Type: tokenizer.Punctuation, Value: "'"},
-		{Type: tokenizer.Punctuation, Value: "."},
+		{Type: tokenizer.Punct, Value: "'"},
+		{Type: tokenizer.Punct, Value: "."},
 	}
 
 	want := []tokenizer.Token{
@@ -28,10 +28,10 @@ func TestPipeline_Process(t *testing.T) {
 		{Type: tokenizer.Space, Value: " "},
 		{Type: tokenizer.Word, Value: "amazing"},
 		{Type: tokenizer.Space, Value: " "},
-		{Type: tokenizer.Punctuation, Value: "'"},
+		{Type: tokenizer.Punct, Value: "'"},
 		{Type: tokenizer.Word, Value: "idea"},
-		{Type: tokenizer.Punctuation, Value: "'"},
-		{Type: tokenizer.Punctuation, Value: "."},
+		{Type: tokenizer.Punct, Value: "'"},
+		{Type: tokenizer.Punct, Value: "."},
 	}
 
 	pl := New()
