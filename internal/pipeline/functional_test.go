@@ -1,8 +1,9 @@
 package pipeline
 
 import (
-	"go-reloaded/pkg/tokenizer"
 	"testing"
+
+	"go-reloaded/pkg/tokenizer"
 )
 
 func TestPipelineEndToEnd(t *testing.T) {

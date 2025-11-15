@@ -1,8 +1,9 @@
 package pipeline
 
 import (
-	"go-reloaded/pkg/tokenizer"
 	"testing"
+
+	"go-reloaded/pkg/tokenizer"
 )
 
 func BenchmarkPipeline(b *testing.B) {
