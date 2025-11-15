@@ -1,9 +1,10 @@
 package testutils
 
 import (
+	"testing"
+
 	"go-reloaded/internal/pipeline"
 	"go-reloaded/pkg/tokenizer"
-	"testing"
 )
 
 // FormatText applies the full formatting pipeline to input text
