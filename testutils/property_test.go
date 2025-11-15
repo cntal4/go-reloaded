@@ -8,29 +8,29 @@ import (
 
 // generateRandomText creates random text with various formatting markers
 func generateRandomText(seed int64) string {
-	rand.Seed(seed)
+	r := rand.New(rand.NewSource(seed))
 
 	words := []string{"hello", "world", "test", "amazing", "great", "simple"}
 	markers := []string{"(cap)", "(up)", "(low)", "(hex)", "(bin)"}
 	punctuation := []string{".", ",", "!", "?", "..."}
 
 	var result string
-	length := rand.Intn(10) + 5 // 5-15 elements
+	length := r.Intn(10) + 5 // 5-15 elements
 
 	for i := 0; i < length; i++ {
 		if i > 0 {
 			result += " "
 		}
 
-		switch rand.Intn(4) {
+		switch r.Intn(4) {
 		case 0:
-			result += words[rand.Intn(len(words))]
+			result += words[r.Intn(len(words))]
 		case 1:
-			result += markers[rand.Intn(len(markers))]
+			result += markers[r.Intn(len(markers))]
 		case 2:
-			result += punctuation[rand.Intn(len(punctuation))]
+			result += punctuation[r.Intn(len(punctuation))]
 		case 3:
-			result += "' " + words[rand.Intn(len(words))] + " '"
+			result += "' " + words[r.Intn(len(words))] + " '"
 		}
 	}
 

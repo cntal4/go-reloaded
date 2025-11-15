@@ -55,6 +55,31 @@ func TestQuoteProcessor_Process(t *testing.T) {
 				{Type: tokenizer.Punct, Value: "'"},
 			},
 		},
+		{
+			name: "double quotes with spaces",
+			input: []tokenizer.Token{
+				{Type: tokenizer.Punct, Value: "\""},
+				{Type: tokenizer.Space, Value: " "},
+				{Type: tokenizer.Word, Value: "It"},
+				{Type: tokenizer.Space, Value: " "},
+				{Type: tokenizer.Word, Value: "was"},
+				{Type: tokenizer.Space, Value: " "},
+				{Type: tokenizer.Word, Value: "fun"},
+				{Type: tokenizer.Punct, Value: "!"},
+				{Type: tokenizer.Space, Value: " "},
+				{Type: tokenizer.Punct, Value: "\""},
+			},
+			want: []tokenizer.Token{
+				{Type: tokenizer.Punct, Value: "\""},
+				{Type: tokenizer.Word, Value: "It"},
+				{Type: tokenizer.Space, Value: " "},
+				{Type: tokenizer.Word, Value: "was"},
+				{Type: tokenizer.Space, Value: " "},
+				{Type: tokenizer.Word, Value: "fun"},
+				{Type: tokenizer.Punct, Value: "!"},
+				{Type: tokenizer.Punct, Value: "\""},
+			},
+		},
 	}
 
 	for _, tt := range tests {
